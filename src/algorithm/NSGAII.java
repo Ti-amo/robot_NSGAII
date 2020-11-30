@@ -15,8 +15,8 @@ import util.Path;
 
 public class NSGAII {
 	public Graph graph;
-	public Point startPoint;
-	public Point endPoint;
+	public static Point startPoint;
+	public static Point endPoint;
 	public double distanceX;
 	public final int NP = 1; // population size
 	public int numY = 6;
@@ -60,7 +60,6 @@ public class NSGAII {
 
 				}
 				newPath.points[numY] = endPoint;
-
 			}
 			particles[i] = newPath;
 		}
@@ -85,7 +84,11 @@ public class NSGAII {
 		this.endPoint = endPoint;
 		getDistanceX(numY, startPoint, endPoint);
 		initialize();
+		for (int i = 0; i < particles.length; i++) {
+			System.out.println("Path distance");
+		}
 		getPath();
+
 	}
 
 	
