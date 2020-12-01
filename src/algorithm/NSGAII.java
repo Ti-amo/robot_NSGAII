@@ -18,13 +18,14 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 1; // population size
+	public final int NP = 2; // population size
 	public int numY = 6;
 	public Path[] particles = new Path[NP];
 	static final double maxPointy = 20;
 	static final double minPointy = -20;
 	static Random rd = new Random();
 	public LinkedList<Point> pointsToVisit = new LinkedList<Point>();
+	public Path[] NDPOP = new Path[NP];
 
 	public double getDistanceX(double numY, Point start, Point end) {
 		double a2, b2, distance;
@@ -65,12 +66,27 @@ public class NSGAII {
 		}
 
 		for (i = 0; i < NP; i++) {
-			System.out.print("\nParticle " + i + ": ");
 			for (int j = 0; j < Path.n; j++) {
-				System.out.print("(" + particles[i].points[j].x + ", " + particles[i].points[j].y + ")");
+//				System.out.print("(" + particles[i].points[j].x + ", " + particles[i].points[j].y + ")");
 				Point point = new Point(particles[i].points[j].x, particles[i].points[j].y);
 				pointsToVisit.add(point);
 			}
+		}
+	}
+	
+//	public void ranking() {
+//		
+//		for (int i = 0; i < NP; i++) {
+//			Path temp = new Path(NP);
+//			if (particles[i].pathDistance())
+//		}
+//	}
+	
+	public void printResult() {
+		for (int i = 0; i < NP; i++) {
+			System.out.println("Particle " + i);
+			System.out.print("Distance: " + particles[i].pathDistance()+ "\nSmooth: " + particles[i].pathSmooth()+ "\nSafety: " + particles[i].pathSafety(graph));
+			System.out.println("\n");
 		}
 	}
 	
@@ -84,13 +100,7 @@ public class NSGAII {
 		this.endPoint = endPoint;
 		getDistanceX(numY, startPoint, endPoint);
 		initialize();
-		for (int i = 0; i < particles.length; i++) {
-			System.out.println("Path distance");
-		}
 		getPath();
-
+		printResult();
 	}
-
-	
-
 }
