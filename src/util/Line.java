@@ -147,6 +147,25 @@ public class Line {
 		} while (i != 0);
 		return false;
 	}
+	
+	public Point[] isIntersectObstacleReturnPoint(Obstacle obstacle) {
+//		if ((firstPoint.isIntersectObstacle(obstacle)) || (secondPoint.isIntersectObstacle(obstacle))) {
+//			return true;
+//		}
+		int i = 0;
+		Point[] edgle = new Point[2];
+		do {
+			int next = (i + 1) % obstacle.cornerNumber;
+			if (isIntersectLine(obstacle.points[i], obstacle.points[next])) {
+				
+				edgle[0] = obstacle.points[i];
+				edgle[1] = obstacle.points[next];
+				return edgle;
+			}
+			i = next;
+		} while (i != 0);
+		return edgle;
+	}
 
 	public boolean isIntersectGraph(Graph g) {
 		for (int i = 0; i < g.obstacleNumber; i++) {
@@ -155,6 +174,16 @@ public class Line {
 			}
 		}
 		return false;
+	}
+	
+	public Obstacle isIntersectGraphReturnObstacles(Graph g) {
+		Obstacle tempObstacle = null;
+		for (int i = 0; i < g.obstacleNumber; i++) {
+			if (isIntersectObstacle(g.obstacles[i])) {
+				tempObstacle = g.obstacles[i];
+			}
+		}
+		return tempObstacle;
 	}
 
 	public int countIntersectObstacle(Obstacle obstacle) {
