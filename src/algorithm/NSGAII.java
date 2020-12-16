@@ -79,19 +79,21 @@ public class NSGAII {
 		}
 
 //		for (i = 0; i < NP; i++) {
-//			InvalidSolutionOperator(particles[i]);
+//			
 //			for (int j = 0; j < Path.n; j++) {
 ////				System.out.print("(" + particles[i].points[j].x + ", " + particles[i].points[j].y + ")");
 //				Point point = new Point(particles[i].points[j].x, particles[i].points[j].y);
 //				pointsToVisit.add(point);
+////				System.out.println("AAAAA" + particles[i].points[j].x);
 //			}
+////			InvalidSolutionOperator(particles[i]);
 //		}
 		for (i = 0; i < NP; i++) {
 		Path rightPath = InvalidSolutionOperator(particles[i]);
 		for (int j = 0; j < rightPath.n ; j++) {
 //			System.out.print("(" + particles[i].points[j].x + ", " + particles[i].points[j].y + ")");
-//			Point point = new Point(rightPath.points[j].x , rightPath.points[j].y);
-//			pointsToVisit.add(point);
+			Point point = new Point(rightPath.points[j].x , rightPath.points[j].y);
+			pointsToVisit.add(point);
 			System.out.println("AAAAA" + rightPath.points[j].x);
 //			System.out.println("pointtoVisit " + j + ": " + rightPath.points[j].x + " " + rightPath.points[j].y);
 		}
@@ -100,46 +102,86 @@ public class NSGAII {
 
 	public Path InvalidSolutionOperator(Path path) {
 		List<Point> listPoint = new LinkedList<Point>(Arrays.asList(path.points));
-		int count = 0;
-		int i= 0;
-		
-		while(i <path.points.length -1 ) {
-			Line tempLine = new Line(listPoint.get(i), listPoint.get(i+1));
-//			System.out.println("--------" + i);
-			if (tempLine.isIntersectGraphReturnObstacles(graph) != null) {
-				System.out.println("true" + tempLine.isIntersectGraphReturnObstacles(graph) + " " + i);
-				Obstacle intersectObstacle = tempLine.isIntersectGraphReturnObstacles(graph);
-				Point intersectPoint = intersectObstacle.points[0];
-				double minDistance = distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[0]);
-				for (int j= 1; j<intersectObstacle.points.length -1; j++) {
-					System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
-					if (minDistance > distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j])) {
-						minDistance = distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]);
-						intersectPoint = intersectObstacle.points[j];
-						
-					}
-				}
-				
-				listPoint.add(i+count, intersectPoint);
-				count++;
-				System.out.println("minDistance" + minDistance);
-//				System.out.println("true" + tempLine.isIntersectGraphReturnObstacles(graph) + " " + i);
-				System.out.println("---------");
-			}
-			i++;
+		int size = listPoint.size();
+		int count = 1;
+//		int i= 0;
+		System.out.println("SIZE" + listPoint.size());
 
+		for (int i = 0; i < size - 1; i++) {
+//			Line tempLine = new Line(path.points[i], path.points[i + 1]);
+//			System.out.println("pree" + i + " " + path.points[i] + "next " + path.points[i + 1]);
+////			System.out.println("--------" + i);
+//			if (tempLine.isIntersectGraphReturnObstacles(graph) != null) {
+//				System.out.println("true" + tempLine.isIntersectGraphReturnObstacles(graph) + " " + i);
+//				Obstacle intersectObstacle = tempLine.isIntersectGraphReturnObstacles(graph);
+//				Point intersectPoint = intersectObstacle.points[0];
+//				double minDistance = distanceBetweenTwoPoints(path.points[i], intersectObstacle.points[0]);
+//				for (int j = 1; j < intersectObstacle.points.length - 1; j++) {
+////					System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
+//					if (minDistance > distanceBetweenTwoPoints(path.points[i], intersectObstacle.points[j])) {
+//						minDistance = distanceBetweenTwoPoints(path.points[i], intersectObstacle.points[j]);
+//						intersectPoint = intersectObstacle.points[j];
+//
+//					}
+//				}
+//
+//				listPoint.add(i + count, intersectPoint);
+//				Line tempLine2 = new Line(listPoint.get(i+count), path.points[i+1]);
+//				
+//				count++;
+////				System.out.println("minDistance" + minDistance);
+////				System.out.println("true" + tempLine.isIntersectGraphReturnObstacles(graph) + " " + i);
+////				System.out.println("---------");
+//			}
+//			i++;
+if (findWayAvoidObs(path.points[i], path.points[i + 1], listPoint, count, i) == true) count++;
 		}
 //	for (int j = 0; i < listPoint.size(); i++) {
 //			System.out.println("point " + listPoint.get(i));
 //		}
-
-		Point[] array = listPoint.toArray(new Point[listPoint.size()]);
-		Path newPath = new Path(listPoint.size() + count);
-		for(int j = 0; j < array.length; j++) {
-            System.out.println("AAAAAAA" + array[j]); 
-            newPath.points[j] = array[j];
-        }
+		System.out.println("SIZE" + listPoint.size());
+//		Point[] System.out.println( = new Point[listPoint.size()];
+		Path newPath = new Path(listPoint.size());
+		 for (int i = 0; i < listPoint.size(); i++)  {
+			 newPath.points[i] = listPoint.get(i) ;
+		 }
+			 
+//		arrayPoints = listPoint.toArray(arrayPoints);
+		
+		for (int j = 0; j < newPath.n; j++) {
+			System.out.println("AAAAAAA" + newPath.points[j].x);
+//            newPath.points[j] = array[j];
+		}
 		return newPath;
+	}
+	
+	public boolean findWayAvoidObs(Point a, Point b, List<Point> listPoint, int count, int i) {
+		Line tempLine = new Line(a, b);
+		
+		if (tempLine.isIntersectGraphReturnObstacles(graph) != null) {
+			System.out.println("--------" + i);
+			Obstacle intersectObstacle = tempLine.isIntersectGraphReturnObstacles(graph);
+			Point intersectPoint = intersectObstacle.points[0];
+			double minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[0]);
+			for (int j = 1; j < intersectObstacle.points.length; j++) {
+//				System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
+				if (minDistance > (distanceBetweenTwoPoints(a, intersectObstacle.points[j]))) {
+					minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[j]);
+					intersectPoint = intersectObstacle.points[j];
+
+				}
+			}
+
+			listPoint.add(i + count, intersectPoint);
+			
+			count++;
+//			findWayAvoidObs(listPoint.get(i+count),b, listPoint, count +1, i+1 );
+//			System.out.println("minDistance" + minDistance);
+//			System.out.println("true" + tempLine.isIntersectGraphReturnObstacles(graph) + " " + i);
+//			System.out.println("---------");
+			return true;
+		}
+		return false;
 	}
 
 	public double[] sorting(double a[]) {
