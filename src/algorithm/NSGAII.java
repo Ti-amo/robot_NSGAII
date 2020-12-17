@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-import org.omg.CORBA.Current;
-import org.omg.CORBA.SetOverrideType;
 
-import com.sun.tools.javac.comp.Check;
 
 import util.Graph;
 import util.Line;
@@ -94,7 +91,6 @@ public class NSGAII {
 //			System.out.print("(" + particles[i].points[j].x + ", " + particles[i].points[j].y + ")");
 			Point point = new Point(rightPath.points[j].x , rightPath.points[j].y);
 			pointsToVisit.add(point);
-			System.out.println("AAAAA" + rightPath.points[j].x);
 //			System.out.println("pointtoVisit " + j + ": " + rightPath.points[j].x + " " + rightPath.points[j].y);
 		}
 	}
@@ -148,34 +144,106 @@ if (findWayAvoidObs(path.points[i], path.points[i + 1], listPoint, count, i) == 
 			 
 //		arrayPoints = listPoint.toArray(arrayPoints);
 		
-		for (int j = 0; j < newPath.n; j++) {
-			System.out.println("AAAAAAA" + newPath.points[j].x);
-//            newPath.points[j] = array[j];
-		}
+//		for (int j = 0; j < newPath.n; j++) {
+//			System.out.println("AAAAAAA" + newPath.points[j].x);
+////            newPath.points[j] = array[j];
+//		}
 		return newPath;
 	}
 	
 	public boolean findWayAvoidObs(Point a, Point b, List<Point> listPoint, int count, int i) {
 		Line tempLine = new Line(a, b);
-		
+
 		if (tempLine.isIntersectGraphReturnObstacles(graph) != null) {
 			System.out.println("--------" + i);
 			Obstacle intersectObstacle = tempLine.isIntersectGraphReturnObstacles(graph);
-			Point intersectPoint = intersectObstacle.points[0];
-			double minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[0]);
-			for (int j = 1; j < intersectObstacle.points.length; j++) {
-//				System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
-				if (minDistance > (distanceBetweenTwoPoints(a, intersectObstacle.points[j]))) {
-					minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[j]);
-					intersectPoint = intersectObstacle.points[j];
+//			Point intersectPoint = intersectObstacle.points[0];
+//			System.out.println("aaaaaaaaaaa" + checkOnSameSide(a,b,intersectObstacle.points[0]));
+//			double minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[0]);
+//			for (int j = 1; j < intersectObstacle.points.length; j++) {
+////				System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
+//				if (minDistance > (distanceBetweenTwoPoints(a, intersectObstacle.points[j]))) {
+//					minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[j]);
+//					intersectPoint = intersectObstacle.points[j];
+//
+//				}
+//			}
+			List<Point> LeftCorner = new LinkedList<Point>();
+			List<Point> RightCorner = new LinkedList<Point>();
 
+			for (int j = 0; j < intersectObstacle.points.length; j++) {
+				if (checkOnSameSide(a, b, intersectObstacle.points[j]) == "RIGHT") {
+					RightCorner.add(intersectObstacle.points[j]);
+					System.out.println("RIGHT" + intersectObstacle.points[j].x);
+				} else if (checkOnSameSide(a, b, intersectObstacle.points[j]) == "LEFT") {
+					LeftCorner.add(intersectObstacle.points[j]);
+					System.out.println("LEFT");
+				} else {
+					listPoint.add(i + count, intersectObstacle.points[j]);
+					count++;
 				}
 			}
 
-			listPoint.add(i + count, intersectPoint);
+			System.out.println("LEFTSIDE" + LeftCorner.size() + " RIGHSIZE" + RightCorner.size());
+
+			if (LeftCorner.size() < RightCorner.size()) {
+				for (int j = 0; j < LeftCorner.size(); j++) {
+					listPoint.add(i + count + j, LeftCorner.get(j));
+				}
+				count = count + LeftCorner.size();
+			} else if (RightCorner.size() < LeftCorner.size()) {
+				for (int j = 0; j < RightCorner.size(); j++) {
+					listPoint.add(i + count + j, RightCorner.get(j));
+				}
+				count = count + LeftCorner.size();
+			}
+
+//			else {
+//				double minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[0]);
+//				Point intersectPoint = intersectObstacle.points[0];
+//				for (int j = 1; j < intersectObstacle.points.length; j++) {
+////				System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
+//				if (minDistance > (distanceBetweenTwoPoints(a, intersectObstacle.points[j]))) {
+//					minDistance = distanceBetweenTwoPoints(a, intersectObstacle.points[j]);
+//					intersectPoint = intersectObstacle.points[j];
+//				}
+//				if (RightCorner.contains(intersectPoint)) {
+//					for (int j1 = 0; j1< LeftCorner.size(); j1++) {
+//						listPoint.add(i+count + j1, RightCorner.get(j1));
+//					}
+//					count = count + LeftCorner.size();
+//				}
+//				else {
+//					for (int j1 = 0; j1< LeftCorner.size(); j1++) {
+//						listPoint.add(i+count + j1, LeftCorner.get(j1));
+//					}
+//					count = count + LeftCorner.size();
+//				}
+//			}
+//			}
 			
-			count++;
-//			findWayAvoidObs(listPoint.get(i+count),b, listPoint, count +1, i+1 );
+//			count++;
+
+//			Line tempLine2 = new Line(listPoint.get(i+count -1), b);
+//
+//			if (tempLine2.isIntersectGraphReturnObstacles(graph) != null) {
+//				System.out.println("trueeeeeeeeeee");
+//				Obstacle intersectObstacle2 = tempLine.isIntersectGraphReturnObstacles(graph);
+//				Point intersectPoint2 = intersectObstacle2.points[0];
+//				double minDistance2 = distanceBetweenTwoPoints(listPoint.get(i+count -1), intersectObstacle2.points[0]);
+//				for (int j = 1; j < intersectObstacle.points.length; j++) {
+////				System.out.println("true " + distanceBetweenTwoPoints(listPoint.get(i), intersectObstacle.points[j]));
+//					if (minDistance2 > (distanceBetweenTwoPoints(listPoint.get(i+count -1), intersectObstacle2.points[j]))) {
+//						minDistance2 = distanceBetweenTwoPoints(listPoint.get(i+count -1), intersectObstacle2.points[j]);
+//						intersectPoint2 = intersectObstacle2.points[j];
+//
+//					}
+//				}
+//
+//				listPoint.add(i + count, intersectPoint2);
+//
+//				count++;
+//			}
 //			System.out.println("minDistance" + minDistance);
 //			System.out.println("true" + tempLine.isIntersectGraphReturnObstacles(graph) + " " + i);
 //			System.out.println("---------");
@@ -184,6 +252,32 @@ if (findWayAvoidObs(path.points[i], path.points[i + 1], listPoint, count, i) == 
 		return false;
 	}
 
+	public String checkOnSameSide(Point a, Point b, Point h) {
+		// subtracting co-ordinates of point A
+		// from B and P, to make A as origin
+		Point a1 = new Point(a.x, a.y);
+		Point b1 =new Point(b.x, b.y);
+		Point h1=new Point(h.x, h.y);
+
+		b1.x -= a1.x;
+		b1.y -= a1.y;
+		h1.x -= a1.x;
+		h1.y -= a1.y;
+//
+		// Determining cross Product
+		double cross_product = b1.x * h1.y - b1.y * h1.x;
+
+		// return RIGHT if cross product is positive
+		if (cross_product > 0)
+			return "RIGHT";
+
+		// return LEFT if cross product is negative
+		if (cross_product < 0)
+			return "LEFT";
+
+		// return ZERO if cross product is zero.
+		return "ZERO";
+	}
 	public double[] sorting(double a[]) {
 		for (int i = 0; i < a.length - 1; i++) {
 			for (int j = i + 1; j < a.length; j++) {
