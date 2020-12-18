@@ -25,8 +25,12 @@ public class Main {
 		try {
 			NSGAII pointsToVisit = new NSGAII(graph, startEndPoints.getFirst(), startEndPoints.getLast());
 			LinkedList<Point> findPath = pointsToVisit.getPath();
+			LinkedList<Point> findPathAfterFixed = pointsToVisit.getPathAfterFixed();
 			for (int i = 0; i < findPath.size() - 1; i++) {
 				gui.canvas.drawLine(findPath.get(i), findPath.get(i + 1), Color.BLACK);
+			}
+			for (int i = 0; i < findPathAfterFixed.size() - 1; i++) {
+				gui.canvas.drawLine(findPathAfterFixed.get(i), findPathAfterFixed.get(i + 1), Color.ORANGE);
 			}
 			gui.canvas.drawLineStartToEnd(startEndPoints);
 		} catch (Exception e) {
