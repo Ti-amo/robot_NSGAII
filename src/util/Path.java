@@ -1,5 +1,8 @@
 package util;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import algorithm.NSGAII;
 
 public class Path {
@@ -7,11 +10,15 @@ public class Path {
 	public double[] pointy;
 	public Point[] points;
 	public NSGAII NSGAII;
+	public List<Path>  S;
+	public static int non_dominated;
 	
 	public Path(int no) {
 		n = no;
 		pointy = new double[n];
 		points = new Point[n];
+		S = new LinkedList<Path>();
+		non_dominated = 0;
 	}
 	
 	public static Point convertPointytoPoints(double pointy, double pointx, Point start, Point end) {
@@ -32,14 +39,25 @@ public class Path {
 	public double pathDistance() {
 		double dis = 0;
 		double a2, b2, distance;
-		a2 = Math.pow(Math.abs(NSGAII.startPoint.x - NSGAII.endPoint.x), 2);
-	    b2 = Math.pow(Math.abs(NSGAII.startPoint.y - NSGAII.endPoint.y), 2);
-	    distance = Math.sqrt(a2 + b2);
-		for (int i = 0; i < n-1; i++) {
-			dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(pointy[i+1]-pointy[i], 2));
+//		a2 = Math.pow(Math.abs(NSGAII.startPoint.x - NSGAII.endPoint.x), 2);
+//	    b2 = Math.pow(Math.abs(NSGAII.startPoint.y - NSGAII.endPoint.y), 2);
+//	    distance = Math.sqrt(a2 + b2);
+//		for (int i = 0; i < n-1; i++) {
+////			dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(pointy[i+1]-pointy[i], 2));
+//	System.out.println("aaaaa" + i);	
+//		}
+//		dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(NSGAII.startPoint.y-pointy[0], 2));
+//		dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(NSGAII.endPoint.y-pointy[n-1], 2));
+		for (int i = 0; i < points.length-1; i++) {
+			a2 = Math.pow(Math.abs(points[i+1].x - points[i].x), 2);
+		    b2 = Math.pow(Math.abs(points[i+1].y - points[i].y), 2);
+		    dis = dis + Math.sqrt(a2 + b2);
+//			a2 = points[i].x - points[i+1].x;
 		}
-		dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(NSGAII.startPoint.y-pointy[0], 2));
-		dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(NSGAII.endPoint.y-pointy[n-1], 2));
+//		a2 = Math.pow(Math.abs(Math.round(points[0].x *100)/100- Math.round(points[n].x *100)/100), 2);
+//	    b2 = Math.pow(Math.abs(Math.round(points[0].y *100)/100 - Math.round(points[n].y *100)/100), 2);
+//	    dis = dis + Math.sqrt(a2 + b2);
+//		dis = points.length;
 		return dis;
 	}
 	
@@ -49,7 +67,7 @@ public class Path {
 		double a, b, c;
 		
 		//for loop from 1 to n-2 (except startPoint, endPoint)
-		for (int i = 1; i < n-1; i++) {
+		for (int i = 0; i < n-1; i++) {
 			if (i == 0) {
 				a = Math.pow(points[i].x-NSGAII.startPoint.x,2) + Math.pow(points[i].y-NSGAII.startPoint.y,2);
 				b = Math.pow(points[i].x-points[i+1].x,2) + Math.pow(points[i].y-points[i+1].y,2);
