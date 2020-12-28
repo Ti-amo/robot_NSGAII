@@ -23,7 +23,7 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 2; // population size
+	public final int NP = 3; // population size
 	public int numY = 6;
 	public Path[] particles = new Path[NP];
 	static final double maxPointy = 20;
@@ -232,26 +232,43 @@ public class NSGAII {
 	}
 
 	public void ranking(Path[] listPath) {
+
+		LinkedList<Path>[] front = new LinkedList[NP];
 		
-//		for (int i = 0; i< listPath.length; i++) {
-//			for (int j=0; j< listPath.length; j++) {
-//				if (i != j) {
-//					if ((listPath[i].pathDistance() <= listPath[i].pathDistance())
-//						&& (listPath[i].pathSafety(graph)<= listPath[i].pathSafety(graph))
-//						&& (listPath[i].pathSmooth() >= listPath[i].pathSmooth())) {
-//						listPath[i].S.add(listPath[i]);
-//					} else {
-//						listPath[i].non_dominated++;
-//					}
-//				}
-//			}
-//		}
+		for (int i = 0; i< listPath.length; i++) {
+			int tempN = 0;
+			for (int j=0; j< listPath.length; j++) {
+				if (i != j) {
+					if ((listPath[i].pathDistance() <= listPath[j].pathDistance())
+						&& (listPath[i].pathSafety(graph)<= listPath[j].pathSafety(graph))
+						&& (listPath[i].pathSmooth() <= listPath[j].pathSmooth())) {
+						listPath[i].S.add(listPath[j]);
+					} else if ((listPath[i].pathDistance() >= listPath[j].pathDistance())
+							&& (listPath[i].pathSafety(graph)>= listPath[j].pathSafety(graph))
+							&& (listPath[i].pathSmooth() >= listPath[j].pathSmooth())) {
+						System.out.println("i = "+ i);
+						tempN++;
+					}
+				}
+			}
+			listPath[i].non_dominated = tempN;
+		}
+
+		int count = 0;
+
+
+
+		for (int i = 0; i< listPath.length; i++) {
+			if (listPath[i].non_dominated == 0) {
+				System.out.println("FRONT 1: " + "  " + listPath[i].pathDistance() + " " + listPath[i].pathSafety(graph)+ "  " + listPath[i].pathSmooth());
+			}
+		}
 		
 		System.out.println("size" + listPath.length);
 		for (int i = 0; i< listPath.length; i++) {
 //			if (listPath[i].non_dominated == 0) {
-				System.out.println("distance" + listPath[i].pathDistance());
-				System.out.println("smooth" + listPath[i].pathSmooth());
+				System.out.println("particle[" +i + "]= " + listPath[i].non_dominated + " " + listPath[i].pathDistance() + " " + listPath[i].pathSafety(graph)+ "  " + listPath[i].pathSmooth());
+
 //				break;
 //			}
 		}
