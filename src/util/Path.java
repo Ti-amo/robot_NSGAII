@@ -11,7 +11,7 @@ public class Path {
     public Point[] points;
     public NSGAII NSGAII;
     public List<Path> S;
-    public static int non_dominated;
+    public int non_dominated;
 
     public Path(int no) {
         n = no;
