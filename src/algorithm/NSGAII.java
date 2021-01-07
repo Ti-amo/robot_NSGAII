@@ -94,14 +94,14 @@ public class NSGAII {
 	public Path InvalidSolutionOperator(Path path) {
 		List<Point> listPoint = new LinkedList<Point>(Arrays.asList(path.points));
 		int count = 1;
-		System.out.println("SIZE" + listPoint.size());
+//		System.out.println("SIZE" + listPoint.size());
 
 		for (int i = 0; i < path.points.length - 1; i++) {
 			int check = findWayAvoidObs(path.points[i], path.points[i + 1], listPoint, count, i);
 			if (check > 0)
 				count = count + check;
 		}
-		System.out.println("SIZE" + listPoint.size());
+//		System.out.println("SIZE" + listPoint.size());
 		Path newPath = new Path(listPoint.size());
 		for (int i = 0; i < listPoint.size(); i++) {
 			newPath.points[i] = listPoint.get(i);
@@ -114,7 +114,7 @@ public class NSGAII {
 		int check = 0;
 
 		if (tempLine.isIntersectGraphReturnObstacles(graph) != null) {
-			System.out.println("--------" + i);
+//			System.out.println("--------" + i);
 			Obstacle intersectObstacle = tempLine.isIntersectGraphReturnObstacles(graph);
 			List<Point> LeftCorner = new LinkedList<Point>();
 			List<Point> RightCorner = new LinkedList<Point>();
@@ -122,18 +122,18 @@ public class NSGAII {
 			for (int j = 0; j < intersectObstacle.points.length; j++) {
 				if (checkOnSameSide(a, b, intersectObstacle.points[j]) == "RIGHT") {
 					RightCorner.add(intersectObstacle.points[j]);
-					System.out.println("RIGHT" + intersectObstacle.points[j].x);
+//					System.out.println("RIGHT" + intersectObstacle.points[j].x);
 				} else if (checkOnSameSide(a, b, intersectObstacle.points[j]) == "LEFT") {
 					LeftCorner.add(intersectObstacle.points[j]);
-					System.out.println("LEFT" + intersectObstacle.points[j].x);
+//					System.out.println("LEFT" + intersectObstacle.points[j].x);
 				} else {
 					listPoint.add(i + count, intersectObstacle.points[j]);
 					count++;
-					System.out.println("ZERO");
+//					System.out.println("ZERO");
 				}
 			}
 
-			System.out.println("LEFTSIDE" + LeftCorner.size() + " RIGHSIZE" + RightCorner.size());
+//			System.out.println("LEFTSIDE" + LeftCorner.size() + " RIGHSIZE" + RightCorner.size());
 
 			if (LeftCorner.size() < RightCorner.size()) {
 				for (int j = 0; j < LeftCorner.size(); j++) {
@@ -242,31 +242,41 @@ public class NSGAII {
 			int tempN = 0;
 			for (int j = 0; j < listPath.length; j++) {
 				if (i != j) {
-					if ((listPath[i].pathDistance() <= listPath[j].pathDistance())
-							&& (listPath[i].pathSafety(graph) <= listPath[j].pathSafety(graph))
-							&& (listPath[i].pathSmooth() <= listPath[j].pathSmooth())) {
+					if ((listPath[i].pathDistance() < listPath[j].pathDistance())
+							&& (listPath[i].pathSafety(graph) < listPath[j].pathSafety(graph))
+							&& (listPath[i].pathSmooth() < listPath[j].pathSmooth())) {
 						listPath[i].S.add(listPath[j]);
 					}
-					if ((listPath[i].pathDistance() >= listPath[j].pathDistance())
-							&& (listPath[i].pathSafety(graph) >= listPath[j].pathSafety(graph))
-							&& (listPath[i].pathSmooth() >= listPath[j].pathSmooth())) {
+					else if ((listPath[i].pathDistance() > listPath[j].pathDistance())
+							&& (listPath[i].pathSafety(graph) > listPath[j].pathSafety(graph))
+							&& (listPath[i].pathSmooth() > listPath[j].pathSmooth())) {
 						System.out.println("i = " + i + " non - dominate " +  " j= " + j);
 
 						tempN++;
 					}
 				}
 			}
-			if (tempN == 0) {
-				front[0].add(listPath[i]);
-			}
 			listPath[i].non_dominated = tempN;
 		}
+		
+		for (int i = 0; i < listPath.length; i++) {
+			if (listPath[i].non_dominated == 0) {
+				front[0].add(listPath[i]);
+			}
+		}
+		
 
-		int count = front[0].size();
 		int frontNum = 0;
+		
+		System.out.println("size" + listPath.length);
+		for (int i = 0; i < listPath.length; i++) {
+			System.out.println("particle[" + i + "]= " + listPath[i].non_dominated + " " + listPath[i].pathDistance()
+					+ " " + listPath[i].pathSafety(graph) + "  " + listPath[i].pathSmooth());
+		}
 
 		while (front[frontNum].size() != 0) {
 			LinkedList<Path> Q = new LinkedList<Path>();
+			System.out.println("aaaa" + frontNum + " : " + Q.size());
 			for (int i = 0; i < front[frontNum].size(); i++) {
 				for (int j = 0; j < front[frontNum].get(i).S.size(); j++) {
 					front[frontNum].get(i).S.get(j).non_dominated--;
@@ -280,79 +290,14 @@ public class NSGAII {
 				front[frontNum].add(Q.get(k));
 			}
 		}
-
+		
 		for (int i = 0; i < front.length; i++) {
 			System.out.println("-------Front " + i + "-------");
 			for (Path path : front[i]) {
 				System.out.println("		Path" + "  " + path.pathDistance() + " " + path.pathSafety(graph) + "  "
 						+ path.pathSmooth());
 			}
-
 		}
-
-		System.out.println("size" + listPath.length);
-		for (int i = 0; i < listPath.length; i++) {
-//			if (listPath[i].non_dominated == 0) {
-			System.out.println("particle[" + i + "]= " + listPath[i].non_dominated + " " + listPath[i].pathDistance()
-					+ " " + listPath[i].pathSafety(graph) + "  " + listPath[i].pathSmooth());
-
-//				break;
-//			}
-		}
-
-//		double bestDistance = particles[0].pathDistance();
-//		double bestSmooth = particles[0].pathSmooth();
-//		double bestSafe = particles[0].pathSafety(graph);
-//
-//		double distanceArr[] = new double[NP];
-//		double smoothArr[] = new double[NP];
-//		double safeArr[] = new double[NP];
-//
-//		for (int i = 0; i < NP; i++) {
-//			distanceArr[i] = particles[i].pathDistance();
-//			smoothArr[i] = particles[i].pathSmooth();
-//			safeArr[i] = particles[i].pathSafety(graph);
-//		}
-//
-////		printArr(sorting(distanceArr));
-////		printArr(sorting(smoothArr));
-////		printArr(sorting(safeArr));
-//
-//		int current = 0;
-//		int front = 0;
-//		Path[] tempPath = path;
-//		ArrayList<ArrayList<Path>> F = new ArrayList<ArrayList<Path>>();
-//
-//		while (current < path.length) {
-//			System.out.println("current" + tempPath[current].pathDistance());
-//			ArrayList<Path> tempFront = new ArrayList<Path>();
-//			removeElement(tempPath, current);
-//			for (Path path2 : tempPath) {
-//				if (path[current].pathDistance() <= path2.pathDistance()) {
-//					if (path[current].pathSafety(graph) <= path2.pathSafety(graph)) {
-//						if (path[current].pathSmooth() >= path2.pathSmooth()) {
-//							tempFront.add(path[current]);
-//							current++;
-//							break;
-//						}
-//					}
-//				}
-//			}
-//			F.add(tempFront);
-//			current++;
-//
-//		}
-//
-//		printResult(F);
-//
-////		for (int i = 0; i < NP; i++) {
-////			Path temp = new Path(NP);
-////			int count = 0;
-////			if (bestDistance < particles[i].pathDistance()) {
-////				count 
-////			}
-////		}
-
 	}
 
 	private void printResult(ArrayList<ArrayList<Path>> f) {
