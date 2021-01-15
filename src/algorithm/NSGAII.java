@@ -499,7 +499,6 @@ public class NSGAII {
 	public void CrossoverOperation(LinkedList<Path> listPathPopC, LinkedList<Path> newListPath) {
 		int i = 0;
 		while (i < listPathPopC.size()) {
-System.out.print("New Swap Point: " + listPathPopC.get(i).points[crossoverPoint]);
 			Point temp;
 			if (i > listPathPopC.size()) {
 				temp = listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint];
@@ -510,7 +509,6 @@ System.out.print("New Swap Point: " + listPathPopC.get(i).points[crossoverPoint]
 			listPathPopC.get(i).points[crossoverPoint] = listPathPopC.get(i + 1).points[crossoverPoint];
 			listPathPopC.get(i + 1).points[crossoverPoint] = temp;
 			
-			System.out.print(" - " + listPathPopC.get(i+1).points[crossoverPoint] + " \n");
 			newListPath.add(listPathPopC.get(i));
 			newListPath.add(listPathPopC.get(i));
 			i = i + 2;
