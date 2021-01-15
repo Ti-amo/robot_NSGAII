@@ -12,6 +12,7 @@ public class Path {
     public NSGAII NSGAII;
     public List<Path> S;
     public int non_dominated;
+    public double crowding_distance;
 
     public Path(int no) {
         n = no;
@@ -19,6 +20,7 @@ public class Path {
         points = new Point[n];
         S = new LinkedList<Path>();
         non_dominated = 0;
+        crowding_distance = 0;
     }
 
     public static Point convertPointytoPoints(double pointy, double pointx, Point start, Point end) {
