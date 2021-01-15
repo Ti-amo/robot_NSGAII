@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -21,15 +22,21 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 10; // population size
+	public final int NP = 100; // population size
 	public int numY = 6;
-	public Path[] particles = new Path[NP];
+	public Path[] POP = new Path[NP];
+	public Path[] NDPOP = new Path[NP];
 	static final double maxPointy = 20;
 	static final double minPointy = -20;
 	static Random rd = new Random();
 	public LinkedList<Point> pointsToVisit = new LinkedList<Point>();
 	public LinkedList<Point> pointsToVisitAfterFixed = new LinkedList<Point>();
-	public Path[] NDPOP = new Path[NP];
+	public double maxDistance = 0;
+	public double minDistance = 0;
+	public double maxSafety = 0;
+	public double minSafety = 0;
+	public double maxSmooth = 0;
+	public double minSmooth = 0;
 
 	public double distanceBetweenTwoPoints(Point a, Point b) {
 		double a2, b2, distance;
@@ -72,18 +79,18 @@ public class NSGAII {
 				}
 				newPath.points[numY] = endPoint;
 			}
-			particles[i] = newPath;
+			POP[i] = newPath;
 		}
 
 		for (i = 0; i < NP; i++) {
 
 			for (int j = 0; j < Path.n; j++) {
-				Point point = new Point(particles[i].points[j].x, particles[i].points[j].y);
+				Point point = new Point(POP[i].points[j].x, POP[i].points[j].y);
 				pointsToVisit.add(point);
 			}
 		}
 		for (i = 0; i < NP; i++) {
-			Path rightPath = InvalidSolutionOperator(particles[i]);
+			Path rightPath = InvalidSolutionOperator(POP[i]);
 			for (int j = 0; j < rightPath.n; j++) {
 				Point point = new Point(rightPath.points[j].x, rightPath.points[j].y);
 				pointsToVisitAfterFixed.add(point);
@@ -223,14 +230,14 @@ public class NSGAII {
 		System.out.println("\n");
 	}
 
-	public Path[] removeElement(Path[] array, int index) {
-		for (int i = index; i < array.length - 1; i++) {
-			array[i] = array[i + 1];
-		}
-		return array;
-	}
-
 	public void ranking(Path[] listPath) {
+
+		maxDistance = listPath[0].pathDistance();
+		minDistance = listPath[0].pathDistance();
+		maxSafety = listPath[0].pathSafety(graph);
+		minSafety = listPath[0].pathSafety(graph);
+		maxSmooth = listPath[0].pathSmooth();
+		minSmooth = listPath[0].pathSmooth();
 
 		LinkedList<Path>[] front = new LinkedList[NP];
 
@@ -240,17 +247,26 @@ public class NSGAII {
 
 		for (int i = 0; i < listPath.length; i++) {
 			int tempN = 0;
+
+			if (maxDistance < listPath[i].pathDistance())
+				maxDistance = listPath[i].pathDistance();
+			if (minDistance > listPath[i].pathDistance())
+				minDistance = listPath[i].pathDistance();
+			if (maxSafety < listPath[i].pathSafety(graph))
+				maxSafety = listPath[i].pathSafety(graph);
+			if (minSafety > listPath[i].pathSafety(graph))
+				minSafety = listPath[i].pathSafety(graph);
+			if (maxSmooth < listPath[i].pathSmooth())
+				maxSmooth = listPath[i].pathSmooth();
+			if (minSmooth > listPath[i].pathSmooth())
+				maxSmooth = listPath[i].pathSmooth();
+
 			for (int j = 0; j < listPath.length; j++) {
 				if (i != j) {
-					if ((listPath[i].pathDistance() < listPath[j].pathDistance())
-							&& (listPath[i].pathSafety(graph) < listPath[j].pathSafety(graph))
-							&& (listPath[i].pathSmooth() < listPath[j].pathSmooth())) {
+					if (checkDomination(listPath[i], listPath[j]) == true) {
 						listPath[i].S.add(listPath[j]);
-					}
-					else if ((listPath[i].pathDistance() > listPath[j].pathDistance())
-							&& (listPath[i].pathSafety(graph) > listPath[j].pathSafety(graph))
-							&& (listPath[i].pathSmooth() > listPath[j].pathSmooth())) {
-						System.out.println("i = " + i + " non - dominate " +  " j= " + j);
+					} else if (checkDomination(listPath[j], listPath[i]) == true) {
+						System.out.println("i = " + i + " non - dominate " + " j= " + j);
 
 						tempN++;
 					}
@@ -258,21 +274,20 @@ public class NSGAII {
 			}
 			listPath[i].non_dominated = tempN;
 		}
-		
+
 		for (int i = 0; i < listPath.length; i++) {
 			if (listPath[i].non_dominated == 0) {
 				front[0].add(listPath[i]);
 			}
 		}
-		
 
 		int frontNum = 0;
-		
-		System.out.println("size" + listPath.length);
-		for (int i = 0; i < listPath.length; i++) {
-			System.out.println("particle[" + i + "]= " + listPath[i].non_dominated + " " + listPath[i].pathDistance()
-					+ " " + listPath[i].pathSafety(graph) + "  " + listPath[i].pathSmooth());
-		}
+
+//		System.out.println("size" + listPath.length);
+//		for (int i = 0; i < listPath.length; i++) {
+//			System.out.println("particle[" + i + "]= " + listPath[i].non_dominated + " " + listPath[i].pathDistance()
+//					+ " " + listPath[i].pathSafety(graph) + "  " + listPath[i].pathSmooth());
+//		}
 
 		while (front[frontNum].size() != 0) {
 			LinkedList<Path> Q = new LinkedList<Path>();
@@ -286,17 +301,84 @@ public class NSGAII {
 				}
 			}
 			frontNum++;
-			for (int k=0; k<Q.size(); k++) {
+			for (int k = 0; k < Q.size(); k++) {
 				front[frontNum].add(Q.get(k));
 			}
 		}
-		
+
 		for (int i = 0; i < front.length; i++) {
 			System.out.println("-------Front " + i + "-------");
 			for (Path path : front[i]) {
 				System.out.println("		Path" + "  " + path.pathDistance() + " " + path.pathSafety(graph) + "  "
 						+ path.pathSmooth());
 			}
+		}
+		for (int i = 0; i < front.length; i++) {
+			if (front[i].size() != 0)
+				crowdingDistance(front[i]);
+		}
+
+	}
+
+	public boolean checkDomination(Path a, Path b) {
+		if (((a.pathDistance() < b.pathDistance()) && (a.pathSafety(graph) <= b.pathSafety(graph))
+				&& (a.pathSmooth() <= b.pathSmooth()))
+				|| ((a.pathDistance() <= b.pathDistance()) && (a.pathSafety(graph) < b.pathSafety(graph))
+						&& (a.pathSmooth() <= b.pathSmooth()))
+				|| ((a.pathDistance() <= b.pathDistance()) && (a.pathSafety(graph) <= b.pathSafety(graph))
+						&& (a.pathSmooth() < b.pathSmooth()))) {
+			return true;
+		}
+		return false;
+	}
+
+	public void crowdingDistance(LinkedList<Path> front) {
+//			crowdingDistanceWithPathDistance(front);
+//			crowdingDistanceWithPathSafety(front);
+		crowdingDistanceWithPathSmooth(front);
+
+		for (int i = 0; i < front.size(); i++) {
+			System.out.println(
+					" Sorted Path" + "  " + front.get(i).pathDistance() + " " + front.get(i).pathSafety(graph) + "  "
+							+ front.get(i).pathSmooth() + " crowding_distance: " + front.get(i).crowding_distance);
+		}
+
+	}
+
+	public void crowdingDistanceWithPathDistance(LinkedList<Path> front) {
+		front.sort(new PathDistanceComparator());
+
+		front.get(0).crowding_distance = 10000;
+		front.get(front.size() - 1).crowding_distance = 10000;
+
+		for (int i = 1; i < front.size() - 1; i++) {
+			front.get(i).crowding_distance = front.get(i).crowding_distance
+					+ (front.get(i + 1).pathDistance() - front.get(i - 1).pathDistance()) / (maxDistance - minDistance);
+		}
+	}
+
+	public void crowdingDistanceWithPathSafety(LinkedList<Path> front) {
+		front.sort(new PathSafetyComparator());
+
+		front.get(0).crowding_distance = 10000;
+		front.get(front.size() - 1).crowding_distance = 10000;
+
+		for (int i = 1; i < front.size() - 1; i++) {
+			front.get(i).crowding_distance = front.get(i).crowding_distance
+					+ (front.get(i + 1).pathSafety(graph) - front.get(i - 1).pathSafety(graph))
+							/ (maxSafety - minSafety);
+		}
+	}
+
+	public void crowdingDistanceWithPathSmooth(LinkedList<Path> front) {
+		front.sort(new PathSmoothComparator());
+
+		front.get(0).crowding_distance = 10000;
+		front.get(front.size() - 1).crowding_distance = 10000;
+
+		for (int i = 1; i < front.size() - 1; i++) {
+			front.get(i).crowding_distance = front.get(i).crowding_distance
+					+ (front.get(i + 1).pathSmooth() - front.get(i - 1).pathSmooth()) / (maxSmooth - minSmooth);
 		}
 	}
 
@@ -317,8 +399,8 @@ public class NSGAII {
 	public void printResult() {
 		for (int i = 0; i < NP; i++) {
 			System.out.println("Particle " + i);
-			System.out.print("Distance: " + particles[i].pathDistance() + "\nSmooth: " + particles[i].pathSmooth()
-					+ "\nSafety: " + particles[i].pathSafety(graph));
+			System.out.print("Distance: " + POP[i].pathDistance() + "\nSmooth: " + POP[i].pathSmooth() + "\nSafety: "
+					+ POP[i].pathSafety(graph));
 			System.out.println("\n");
 		}
 	}
@@ -331,7 +413,67 @@ public class NSGAII {
 		return pointsToVisitAfterFixed;
 	}
 
+	class PathDistanceComparator implements Comparator<Path> {
+		@Override
+		public int compare(Path path1, Path path2) {
+			if (path1.pathDistance() == path2.pathDistance())
+				return 0;
+			else if (path1.pathDistance() > path2.pathDistance())
+				return 1;
+			else
+				return -1;
+		}
+	}
+
+	class PathSafetyComparator implements Comparator<Path> {
+		@Override
+		public int compare(Path path1, Path path2) {
+			if (path1.pathSafety(graph) == path2.pathSafety(graph))
+				return 0;
+			else if (path1.pathSafety(graph) > path2.pathSafety(graph))
+				return 1;
+			else
+				return -1;
+		}
+	}
+
+	class PathSmoothComparator implements Comparator<Path> {
+		@Override
+		public int compare(Path path1, Path path2) {
+			if (path1.pathSmooth() == path2.pathSmooth())
+				return 0;
+			else if (path1.pathSmooth() > path2.pathSmooth())
+				return 1;
+			else
+				return -1;
+		}
+	}
+	
+	class CrowdingDistanceComparator implements Comparator<Path> {
+		@Override
+		public int compare(Path path1, Path path2) {
+			if (path1.crowding_distance == path2.crowding_distance)
+				return 0;
+			else if (path1.crowding_distance > path2.crowding_distance)
+				return 1;
+			else
+				return -1;
+		}
+	}
+	
+	public void sortingFront(LinkedList<Path> front) {
+		front.sort(new CrowdingDistanceComparator());
+	}
+	
+	public void SelectionOperation(LinkedList<Path>[] front, Path[] path) {
+		for (int i = 0; i < front.length; i++) {
+			
+		}
+	}
+
 	public NSGAII(Graph graph, Point startPoint, Point endPoint) {
+		Path[] NEWPOP = new Path[NP];
+		Path[] POPc = new Path[NP];
 		this.graph = graph;
 		this.startPoint = startPoint;
 		this.endPoint = endPoint;
@@ -340,8 +482,8 @@ public class NSGAII {
 		getPath();
 		getPathAfterFixed();
 //		printResult();
-//		List<Path> listPaths = new LinkedList<Path>(Arrays.asList(particles));
-		ranking(particles);
+//		List<Path> listPaths = new LinkedList<Path>(Arrays.asList(POP));
+		ranking(POP);
 //System.out.println("distance" + particles[0].pathDistance());
 	}
 }
