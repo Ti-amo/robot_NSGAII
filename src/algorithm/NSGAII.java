@@ -22,9 +22,9 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 100; // population size
-	public final int crossoverPoint = 2; // crossoverPoint
-	public int numY = 6;
+	public final int NP = 60; // population size
+	public final int crossoverPoint = 3; // crossoverPoint
+	public int numY = 8;
 	public LinkedList<Path> POP = new LinkedList<Path>();
 	public LinkedList<Path> NDPOP = new LinkedList<Path>();
 	static final double maxPointy = 20;
@@ -90,9 +90,19 @@ public class NSGAII {
 				pointsToVisit.add(point);
 			}
 		}
-		for (i = 0; i < NP; i++) {
-			Path rightPath = InvalidSolutionOperator(POP.get(i));
-			for (int j = 0; j < rightPath.n; j++) {
+//		for (i = 0; i < NP; i++) {
+//			Path rightPath = InvalidSolutionOperator(POP.get(i));
+//			for (int j = 0; j < rightPath.n; j++) {
+//				Point point = new Point(rightPath.points[j].x, rightPath.points[j].y);
+//				pointsToVisitAfterFixed.add(point);
+//			}
+//		}
+	}
+
+	public void InvalidSolutionOperator(LinkedList<Path> listPath) {
+		for (int i = 0; i < listPath.size(); i++) {
+			Path rightPath = InvalidSolutionOperator(listPath.get(i));
+			for (int j = 0; j < rightPath.points.length; j++) {
 				Point point = new Point(rightPath.points[j].x, rightPath.points[j].y);
 				pointsToVisitAfterFixed.add(point);
 			}
@@ -498,20 +508,26 @@ public class NSGAII {
 
 	public void CrossoverOperation(LinkedList<Path> listPathPopC, LinkedList<Path> newListPath) {
 		int i = 0;
-		while (i < listPathPopC.size()) {
-			Point temp;
-			if (i > listPathPopC.size()) {
-				temp = listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint];
-				listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint] = listPathPopC.get(listPathPopC.size()).points[crossoverPoint];
-				listPathPopC.get(listPathPopC.size()).points[crossoverPoint] = temp;
-			}
+		Point temp;
+
+		while (i < listPathPopC.size() - 1) {
+
 			temp = listPathPopC.get(i).points[crossoverPoint];
 			listPathPopC.get(i).points[crossoverPoint] = listPathPopC.get(i + 1).points[crossoverPoint];
 			listPathPopC.get(i + 1).points[crossoverPoint] = temp;
-			
+
 			newListPath.add(listPathPopC.get(i));
-			newListPath.add(listPathPopC.get(i));
+			newListPath.add(listPathPopC.get(i + 1));
 			i = i + 2;
+			System.out.println("i = " + i);
+		}
+
+		if (listPathPopC.size() % 2 != 0) {
+			temp = listPathPopC.get(listPathPopC.size() - 2).points[crossoverPoint];
+			listPathPopC.get(listPathPopC.size() - 2).points[crossoverPoint] = listPathPopC
+					.get(listPathPopC.size() - 1).points[crossoverPoint];
+			listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint] = temp;
+			newListPath.add(listPathPopC.get(listPathPopC.size() - 1));
 		}
 	}
 
@@ -531,8 +547,10 @@ public class NSGAII {
 		SelectionOperation(listAfterRanking, POPc);
 		CrossoverOperation(POPc, NEWPOP);
 		printLinkedList(NEWPOP);
+		InvalidSolutionOperator(NEWPOP);
 		getPath();
 		getPathAfterFixed();
+
 //System.out.println("distance" + particles[0].pathDistance());
 	}
 }
