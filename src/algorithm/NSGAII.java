@@ -22,7 +22,7 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 100; // population size
+	public final int NP = 10; // population size
 	public final int crossoverPoint = 2; // crossoverPoint
 	public int numY = 6;
 	public LinkedList<Path> POP = new LinkedList<Path>();
@@ -500,15 +500,17 @@ public class NSGAII {
 		int i = 0;
 		while (i < listPathPopC.size()) {
 			Point temp;
-			if (i > listPathPopC.size()) {
-				temp = listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint];
-				listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint] = listPathPopC.get(listPathPopC.size()).points[crossoverPoint];
-				listPathPopC.get(listPathPopC.size()).points[crossoverPoint] = temp;
+			if (i > listPathPopC.size() - 2) {
+				temp = listPathPopC.get(listPathPopC.size() - 2).points[crossoverPoint];
+				listPathPopC.get(listPathPopC.size() - 2).points[crossoverPoint] = listPathPopC
+						.get(listPathPopC.size()-1).points[crossoverPoint];
+				listPathPopC.get(listPathPopC.size()-1).points[crossoverPoint] = temp;
+				break;
 			}
 			temp = listPathPopC.get(i).points[crossoverPoint];
 			listPathPopC.get(i).points[crossoverPoint] = listPathPopC.get(i + 1).points[crossoverPoint];
 			listPathPopC.get(i + 1).points[crossoverPoint] = temp;
-			
+
 			newListPath.add(listPathPopC.get(i));
 			newListPath.add(listPathPopC.get(i));
 			i = i + 2;
