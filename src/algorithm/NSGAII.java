@@ -22,9 +22,9 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 10; // population size
+	public final int NP = 6; // population size
 	public final int crossoverPoint = 2; // crossoverPoint
-	public int numY = 6;
+	public int numY = 20;
 	public LinkedList<Path> POP = new LinkedList<Path>();
 	public LinkedList<Path> NDPOP = new LinkedList<Path>();
 	static final double maxPointy = 20;
@@ -99,32 +99,44 @@ public class NSGAII {
 //		}
 	}
 
-	public void InvalidSolutionOperator(LinkedList<Path> listPath) {
+	public void getListPathResult(LinkedList<Path> listPath) {
 		for (int i = 0; i < listPath.size(); i++) {
-			Path rightPath = InvalidSolutionOperator(listPath.get(i));
-			for (int j = 0; j < rightPath.points.length; j++) {
-				Point point = new Point(rightPath.points[j].x, rightPath.points[j].y);
+//			Path rightPath = InvalidSolutionOperator(listPath.get(i));
+			for (int j = 0; j < listPath.get(i).points.length; j++) {
+				Point point = new Point(listPath.get(i).points[j].x, listPath.get(i).points[j].y);
 				pointsToVisitAfterFixed.add(point);
 			}
 		}
 	}
 
-	public Path InvalidSolutionOperator(Path path) {
-		List<Point> listPoint = new LinkedList<Point>(Arrays.asList(path.points));
-		int count = 1;
-//		System.out.println("SIZE" + listPoint.size());
+//	public void InvalidSolutionOperator(LinkedList<Path> listPath) {
+//		for (int i = 0; i < listPath.size(); i++) {
+//			Path rightPath = InvalidSolutionOperator(listPath.get(i));
+//			
+//		}
+//	}
 
-		for (int i = 0; i < path.points.length - 1; i++) {
-			int check = findWayAvoidObs(path.points[i], path.points[i + 1], listPoint, count, i);
-			if (check > 0)
-				count = count + check;
+	public LinkedList<Path> InvalidSolutionOperator(LinkedList<Path> listPathPopC) {
+		LinkedList<Path> newListPath = new LinkedList<Path>();
+		for (int i = 0; i < listPathPopC.size(); i++) {
+			Path path = listPathPopC.get(i);
+			List<Point> listPoint = new LinkedList<Point>(Arrays.asList(path.points));
+			int count = 1;
+//			System.out.println("SIZE" + listPoint.size());
+
+			for (int k = 0; k < path.points.length - 1; k++) {
+				int check = findWayAvoidObs(path.points[k], path.points[k + 1], listPoint, count, k);
+				if (check > 0)
+					count = count + check;
+			}
+//			System.out.println("SIZE" + listPoint.size());
+			Path newPath = new Path(listPoint.size());
+			for (int j = 0; j < listPoint.size(); j++) {
+				newPath.points[j] = listPoint.get(j);
+			}
+			newListPath.add(newPath);
 		}
-//		System.out.println("SIZE" + listPoint.size());
-		Path newPath = new Path(listPoint.size());
-		for (int i = 0; i < listPoint.size(); i++) {
-			newPath.points[i] = listPoint.get(i);
-		}
-		return newPath;
+		return newListPath;
 	}
 
 	public int findWayAvoidObs(Point a, Point b, List<Point> listPoint, int count, int i) {
@@ -189,6 +201,7 @@ public class NSGAII {
 				}
 			}
 		}
+
 		return check;
 	}
 
@@ -499,22 +512,24 @@ public class NSGAII {
 		}
 	}
 
-	public void SelectionOperation(LinkedList<Path> listAfterRanking, LinkedList<Path> listPath) {
-
+	public LinkedList<Path> SelectionOperation(LinkedList<Path> listAfterRanking) {
+		LinkedList<Path> newListPath = new LinkedList<Path>();
 		for (int i = 0; i < NP / 2; i++) {
-			listPath.add(listAfterRanking.get(i));
+			newListPath.add(listAfterRanking.get(i));
 		}
+		return newListPath;
 	}
 
-	public void CrossoverOperation(LinkedList<Path> listPathPopC, LinkedList<Path> newListPath) {
+	public LinkedList<Path> CrossoverOperation(LinkedList<Path> listPathPopC) {
 		int i = 0;
+		LinkedList<Path> newListPath = new LinkedList<Path>();
 		while (i < listPathPopC.size()) {
 			Point temp;
 			if (i > listPathPopC.size() - 2) {
 				temp = listPathPopC.get(listPathPopC.size() - 2).points[crossoverPoint];
 				listPathPopC.get(listPathPopC.size() - 2).points[crossoverPoint] = listPathPopC
-						.get(listPathPopC.size()-1).points[crossoverPoint];
-				listPathPopC.get(listPathPopC.size()-1).points[crossoverPoint] = temp;
+						.get(listPathPopC.size() - 1).points[crossoverPoint];
+				listPathPopC.get(listPathPopC.size() - 1).points[crossoverPoint] = temp;
 				break;
 			}
 			temp = listPathPopC.get(i).points[crossoverPoint];
@@ -526,11 +541,52 @@ public class NSGAII {
 			i = i + 2;
 			System.out.println("i = " + i);
 		}
+		return newListPath;
+	}
+
+	public LinkedList<Path> ShortnessOperator(LinkedList<Path> listPathPopC) {
+		LinkedList<Path> newListPath = new LinkedList<Path>();
+		for (int i = 0; i < listPathPopC.size(); i++) {
+			int j = 0;
+			int index = 0;
+			Point[] tempPoints = new Point[listPathPopC.get(i).points.length];
+			System.out.println("points length" + listPathPopC.get(i).points.length);
+			tempPoints[0] = listPathPopC.get(i).points[0];
+			while (j < (listPathPopC.get(i).points.length - 2)) {
+				index = index + 1;
+				Line tempLine = new Line(listPathPopC.get(i).points[j], listPathPopC.get(i).points[j + 2]);
+				if (tempLine.isIntersectGraphReturnObstacles(graph) == null) {
+					
+					tempPoints[index] = listPathPopC.get(i).points[j + 2];
+					
+					System.out.println("AAAAAAAAAAAA" + j);
+					j = j + 2;
+				} else {
+					
+					tempPoints[index] = listPathPopC.get(i).points[j + 1];
+					
+					System.out.println("BBBBBBBBBBBBBBBBBB" + j);
+					j = j + 1;
+				}
+				
+			}
+			for (int k = 0; k < tempPoints.length; k++) {
+				System.out.println("CCC" + tempPoints[k]); 
+			}
+			Path newPath = new Path(tempPoints.length);
+			for (int k = 0; k < tempPoints.length; k++) {
+				newPath.points[k] = tempPoints[k];
+				System.out.println("newPath"+ newPath.points[k]);
+			}
+			newListPath.add(newPath);
+		}
+		return newListPath;
 	}
 
 	public NSGAII(Graph graph, Point startPoint, Point endPoint) {
 		LinkedList<Path> NEWPOP = new LinkedList<Path>();
 		LinkedList<Path> POPc = new LinkedList<Path>();
+		LinkedList<Path> NDPOP = new LinkedList<Path>();
 		LinkedList<Path> listAfterRanking = new LinkedList<Path>();
 		this.graph = graph;
 		this.startPoint = startPoint;
@@ -541,10 +597,12 @@ public class NSGAII {
 //		printResult();
 //		List<Path> listPaths = new LinkedList<Path>(Arrays.asList(POP));
 		listAfterRanking = ranking(POP);
-		SelectionOperation(listAfterRanking, POPc);
-		CrossoverOperation(POPc, NEWPOP);
+		POPc = SelectionOperation(listAfterRanking);
+		NEWPOP = CrossoverOperation(POPc);
 		printLinkedList(NEWPOP);
-		InvalidSolutionOperator(NEWPOP);
+		NEWPOP = InvalidSolutionOperator(NEWPOP);
+		NEWPOP = ShortnessOperator(NEWPOP);
+		getListPathResult(NEWPOP);
 		getPath();
 		getPathAfterFixed();
 
