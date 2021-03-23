@@ -15,10 +15,10 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		// Tao moi truong
 		GUIRobotics gui = new GUIRobotics(1000, 120, 15);
-		gui.generateEnvironment("obstacles.txt");
+		gui.generateEnvironment("obtacles2.txt");
 
 		// Doc du lieu dau vao
-		Graph graph = new Graph("obstacles.txt");
+		Graph graph = new Graph("obtacles2.txt");
 		LinkedList<Point> startEndPoints = readPointData("input.txt");
 		GraphDivision graphDivision = new GraphDivision(graph, startEndPoints);
 
@@ -30,7 +30,7 @@ public class Main {
 //				gui.canvas.drawLine(findPath.get(i), findPath.get(i + 1), Color.BLACK);
 //			}
 			LinkedList<Point> findPathAfterFixed = pointsToVisit.getPathAfterFixed();
-			for (int i = 0; i < findPathAfterFixed.size() - 1; i++) {
+			for (int i = 0; i < (findPathAfterFixed.size() - 1)/2; i++) {
 				gui.canvas.drawLine(findPathAfterFixed.get(i), findPathAfterFixed.get(i + 1), Color.ORANGE);
 			}
 			gui.canvas.drawLineStartToEnd(startEndPoints);

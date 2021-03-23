@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.sound.midi.Soundbank;
+
 import util.Graph;
 import util.Line;
 import util.Obstacle;
@@ -22,13 +24,13 @@ public class NSGAII {
 	public static Point startPoint;
 	public static Point endPoint;
 	public double distanceX;
-	public final int NP = 6; // population size
+	public final int NP = 60; // population size
 	public final int crossoverPoint = 2; // crossoverPoint
-	public int numY = 20;
+	public int numY = 6;
 	public LinkedList<Path> POP = new LinkedList<Path>();
 	public LinkedList<Path> NDPOP = new LinkedList<Path>();
-	static final double maxPointy = 20;
-	static final double minPointy = -20;
+	static final double maxPointy = 5;
+	static final double minPointy = -5;
 	static Random rd = new Random();
 	public LinkedList<Point> pointsToVisit = new LinkedList<Point>();
 	public LinkedList<Point> pointsToVisitAfterFixed = new LinkedList<Point>();
@@ -51,9 +53,7 @@ public class NSGAII {
 	public double getDistanceX(double numY, Point start, Point end) {
 		double a2, b2, distance;
 		double num;
-		a2 = Math.pow(Math.abs(start.x - end.x), 2);
-		b2 = Math.pow(Math.abs(start.y - end.y), 2);
-		distance = Math.sqrt(a2 + b2);
+		distance = Math.hypot(start.x - end.x, start.y - end.y);
 		System.out.println("Start to end point distance: " + distance);
 		num = distance / numY;
 		return num;
@@ -108,13 +108,6 @@ public class NSGAII {
 			}
 		}
 	}
-
-//	public void InvalidSolutionOperator(LinkedList<Path> listPath) {
-//		for (int i = 0; i < listPath.size(); i++) {
-//			Path rightPath = InvalidSolutionOperator(listPath.get(i));
-//			
-//		}
-//	}
 
 	public LinkedList<Path> InvalidSolutionOperator(LinkedList<Path> listPathPopC) {
 		LinkedList<Path> newListPath = new LinkedList<Path>();
@@ -549,37 +542,66 @@ public class NSGAII {
 		for (int i = 0; i < listPathPopC.size(); i++) {
 			int j = 0;
 			int index = 0;
-			Point[] tempPoints = new Point[listPathPopC.get(i).points.length];
-			System.out.println("points length" + listPathPopC.get(i).points.length);
+			int listLength = listPathPopC.get(i).points.length;
+			System.out.println("length listPath" + listLength);
+			Point[] tempPoints = new Point[listLength];
 			tempPoints[0] = listPathPopC.get(i).points[0];
-			while (j < (listPathPopC.get(i).points.length - 2)) {
+			while (j < (listLength - 3)) {
 				index = index + 1;
 				Line tempLine = new Line(listPathPopC.get(i).points[j], listPathPopC.get(i).points[j + 2]);
 				if (tempLine.isIntersectGraphReturnObstacles(graph) == null) {
-					
 					tempPoints[index] = listPathPopC.get(i).points[j + 2];
-					
-					System.out.println("AAAAAAAAAAAA" + j);
 					j = j + 2;
+					System.out.println("trueeeeeeee");
 				} else {
-					
 					tempPoints[index] = listPathPopC.get(i).points[j + 1];
-					
-					System.out.println("BBBBBBBBBBBBBBBBBB" + j);
 					j = j + 1;
 				}
-				
+
 			}
-			for (int k = 0; k < tempPoints.length; k++) {
-				System.out.println("CCC" + tempPoints[k]); 
+
+			if (j == (listLength - 3)) {
+				Line tempLine = new Line(listPathPopC.get(i).points[listLength - 3],
+						listPathPopC.get(i).points[listLength - 1]);
+				if (tempLine.isIntersectGraphReturnObstacles(graph) == null) {
+					tempPoints[index + 1] = listPathPopC.get(i).points[listLength - 1];
+				} else {
+					tempPoints[index + 1] = listPathPopC.get(i).points[listLength - 2];
+					tempPoints[index + 2] = listPathPopC.get(i).points[listLength - 1];
+				}
 			}
-			Path newPath = new Path(tempPoints.length);
+			if (j == (listLength - 2)) {
+				tempPoints[index + 1] = listPathPopC.get(i).points[listLength - 1];
+			}
+			List<Point> listPoint = new LinkedList<Point>();
 			for (int k = 0; k < tempPoints.length; k++) {
-				newPath.points[k] = tempPoints[k];
-				System.out.println("newPath"+ newPath.points[k]);
+				if (tempPoints[k] != null) {
+					listPoint.add(tempPoints[k]);
+				}
+			}
+			System.out.println("length tempoint" + listPoint.size());
+			Path newPath = new Path(listPoint.size());
+			for (int k = 0; k < listPoint.size(); k++) {
+				newPath.points[k] = listPoint.get(k);
 			}
 			newListPath.add(newPath);
+			System.out.println("length" + newListPath.get(i).points.length);
+//			LinkedList<Path> newListPath2 = new LinkedList<Path>();
+//			newListPath2 = ShortnessOperator(newListPath);
+			System.out.println("check length" + newListPath.get(i).points.length + " ??? " + listPathPopC.get(i).points.length);
+			if (newListPath.get(i).points.length != listPathPopC.get(i).points.length)
+				newListPath =  ShortnessOperator(newListPath);
 		}
+		
+		
+		for (int i = 0; i < listPathPopC.size(); i++) {
+			System.out.println("fffffcheck length" + newListPath.get(i).points.length + " ??? " + listPathPopC.get(i).points.length);
+			
+//				return newListPath;
+//			else
+				
+		}
+		
 		return newListPath;
 	}
 

@@ -30,11 +30,9 @@ public class Path {
         temp1 = end.x - start.x;
         temp2 = end.y - start.y;
         phi = Math.atan(temp2 / temp1);
-//		System.out.println("phi: " + Math.toDegrees(phi));
         x = Math.cos(phi) * pointx - Math.sin(phi) * pointy + start.x;
         y = Math.sin(phi) * pointx + Math.cos(phi) * pointy + start.y;
         p = new Point(x, y);
-//	 me	System.out.println(x + ", " + y);
         return p;
     }
 
