@@ -6,79 +6,62 @@ import java.util.List;
 import algorithm.NSGAII;
 
 public class Path {
-    public static int n;
-    public double[] pointy;
-    public Point[] points;
-    public NSGAII NSGAII;
-    public List<Path> S;
-    public int non_dominated;
-    public double crowding_distance;
+	public static int n;
+	public double[] pointy;
+	public Point[] points;
+	public NSGAII NSGAII;
+	public List<Path> S;
+	public int non_dominated;
+	public double crowding_distance;
 
-    public Path(int no) {
-        n = no;
-        pointy = new double[n];
-        points = new Point[n];
-        S = new LinkedList<Path>();
-        non_dominated = 0;
-        crowding_distance = 0;
-    }
+	public Path(int no) {
+		n = no;
+		pointy = new double[n];
+		points = new Point[n];
+		S = new LinkedList<Path>();
+		non_dominated = 0;
+		crowding_distance = 0;
+	}
 
-    public static Point convertPointytoPoints(double pointy, double pointx, Point start, Point end) {
-        Point p;
-        double x, y;
-        double temp1, temp2, phi;
-        temp1 = end.x - start.x;
-        temp2 = end.y - start.y;
-        phi = Math.atan(temp2 / temp1);
-        x = Math.cos(phi) * pointx - Math.sin(phi) * pointy + start.x;
-        y = Math.sin(phi) * pointx + Math.cos(phi) * pointy + start.y;
-        p = new Point(x, y);
-        return p;
-    }
+	public static Point convertPointytoPoints(double pointy, double pointx, Point start, Point end) {
+		Point p;
+		double x, y;
+		double temp1, temp2, phi;
+		temp1 = end.x - start.x;
+		temp2 = end.y - start.y;
+		phi = Math.atan(temp2 / temp1);
+		x = Math.cos(phi) * pointx - Math.sin(phi) * pointy + start.x;
+		y = Math.sin(phi) * pointx + Math.cos(phi) * pointy + start.y;
+		p = new Point(x, y);
+		return p;
+	}
 
-    public double pathDistance() {
-        double dis = 0;
-        double a2, b2, distance;
-//		a2 = Math.pow(Math.abs(NSGAII.startPoint.x - NSGAII.endPoint.x), 2);
-//	    b2 = Math.pow(Math.abs(NSGAII.startPoint.y - NSGAII.endPoint.y), 2);
-//	    distance = Math.sqrt(a2 + b2);
-//		for (int i = 0; i < n-1; i++) {
-////			dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(pointy[i+1]-pointy[i], 2));
-//	System.out.println("aaaaa" + i);	
-//		}
-//		dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(NSGAII.startPoint.y-pointy[0], 2));
-//		dis += Math.sqrt(Math.pow(distance/(n+1), 2) + Math.pow(NSGAII.endPoint.y-pointy[n-1], 2));
-        for (int i = 0; i < points.length - 1; i++) {
-            a2 = Math.pow(Math.abs(points[i + 1].x - points[i].x), 2);
-            b2 = Math.pow(Math.abs(points[i + 1].y - points[i].y), 2);
-            dis = dis + Math.sqrt(a2 + b2);
+	public double pathDistance() {
+		double distance = 0;
+		for (int i = 0; i < points.length - 1; i++) {
+			distance = distance + Math.hypot(points[i].x - points[i + 1].x, points[i].y - points[i + 1].y);
+		}
+		return distance;
+	}
+
+	public double pathSmooth() {
+		double a1, b1, a2, b2, c1, c2, smoothness;
+		double sum = 0;
+		double[] ang = new double[points.length - 2];
+		for (int i = 0; i < points.length - 2; i++) {
+			double dis = 0;
+			a1 = Math.pow(Math.abs(points[i + 1].x - points[i].x), 2);
+			b1 = Math.pow(Math.abs(points[i + 1].y - points[i].y), 2);
+			a2 = Math.pow(Math.abs(points[i + 2].x - points[i + 1].x), 2);
+			b2 = Math.pow(Math.abs(points[i + 2].y - points[i + 1].y), 2);
+			c1 = (points[i + 1].x - points[i].x) * (points[i + 2].x - points[i + 1].x);
+			c2 = (points[i + 1].y - points[i].y) * (points[i + 2].y - points[i + 1].y);
+			sum = sum + Math.PI - Math.acos((c1 + c2) / (Math.sqrt(a1 + b1) * Math.sqrt(a2 + b2)));
 //			a2 = points[i].x - points[i+1].x;
-        }
-//		a2 = Math.pow(Math.abs(Math.round(points[0].x *100)/100- Math.round(points[n].x *100)/100), 2);
-//	    b2 = Math.pow(Math.abs(Math.round(points[0].y *100)/100 - Math.round(points[n].y *100)/100), 2);
-//	    dis = dis + Math.sqrt(a2 + b2);
-//		dis = points.length;
-        return dis;
-    }
-
-    public double pathSmooth() {
-        double a1, b1, a2, b2, c1, c2, smoothness;
-        double sum = 0;
-        double[] ang = new double[points.length - 2];
-        for (int i = 0; i < points.length - 2; i++) {
-            double dis = 0;
-            a1 = Math.pow(Math.abs(points[i + 1].x - points[i].x), 2);
-            b1 = Math.pow(Math.abs(points[i + 1].y - points[i].y), 2);
-            a2 = Math.pow(Math.abs(points[i + 2].x - points[i + 1].x), 2);
-            b2 = Math.pow(Math.abs(points[i + 2].y - points[i + 1].y), 2);
-            c1 = (points[i + 1].x - points[i].x) * (points[i + 2].x - points[i + 1].x);
-            c2 = (points[i + 1].y - points[i].y) * (points[i + 2].y - points[i + 1].y);
-            sum = sum + Math.PI - Math.acos((c1 + c2) / (Math.sqrt(a1 + b1) * Math.sqrt(a2 + b2)));
-//			a2 = points[i].x - points[i+1].x;
-        }
-        smoothness = sum / (points.length - 2);
-        return smoothness;
-    }
+		}
+		smoothness = sum / (points.length - 2);
+		return smoothness;
+	}
 
 //	public double pathSmooth() {
 //		double S = 0, temp = 0;
@@ -138,86 +121,86 @@ public class Path {
 //		return S;
 //	}
 
-    public double disPointSeg(Point S0, Point S1, Point A) {
-        double px = S1.x - S0.x;
-        double py = S1.y - S0.y;
-        double temp = (px * px) + (py * py);
-        double u = ((A.x - S0.x) * px + (A.y - S0.y) * py) / (temp);
-        if (u > 1) {
-            u = 1;
-        } else if (u < 0) {
-            u = 0;
-        }
-        double x = S0.x + u * px;
-        double y = S0.y + u * py;
-        double dx = x - A.x;
-        double dy = y - A.y;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        return dist;
-    }
+	public double disPointSeg(Point S0, Point S1, Point A) {
+		double px = S1.x - S0.x;
+		double py = S1.y - S0.y;
+		double temp = (px * px) + (py * py);
+		double u = ((A.x - S0.x) * px + (A.y - S0.y) * py) / (temp);
+		if (u > 1) {
+			u = 1;
+		} else if (u < 0) {
+			u = 0;
+		}
+		double x = S0.x + u * px;
+		double y = S0.y + u * py;
+		double dx = x - A.x;
+		double dy = y - A.y;
+		double dist = Math.sqrt(dx * dx + dy * dy);
+		return dist;
+	}
 
-    public double pathSafety(Graph g) {
-        double[] Sa = new double[points.length + 1];
-        double d, safety = 0;
-        for (int i = 1; i < points.length; i++) {
-            Sa[i] = 10000;
-            for (int j = 0; j < g.obstacleNumber; j++) {
-                for (int h = 0; h < g.obstacles[j].cornerNumber; h++) {
-                    if (i == 0) {
-                        d = disPointSeg(NSGAII.startPoint, points[i], g.obstacles[j].points[h]);
-                    } else if (i == points.length) {
-                        d = disPointSeg(points[i - 1], NSGAII.endPoint, g.obstacles[j].points[h]);
-                    } else {
-                        d = disPointSeg(points[i - 1], points[i], g.obstacles[j].points[h]);
-                    }
-                    if (d < Sa[i]) {
-                        Sa[i] = d;
-                    }
-                }
-            }
-        }
-        safety = Sa[1];
-        for (int i = 1; i < points.length; i++) {
-            if (safety > Sa[i]) {
-                safety = Sa[i];
-            }
-        }
-        for (int j = 0; j < g.obstacleNumber; j++) {
-            for (int h = 0; h < g.obstacles[j].cornerNumber; h++) {
-                if (h == g.obstacles[j].cornerNumber - 1) {
-                    for (int i = 0; i < points.length; i++) {
-                        d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[0], points[i]);
-                        if (d < safety) {
-                            safety = d;
-                        }
-                    }
-                    d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[0], NSGAII.startPoint);
-                    if (d < safety) {
-                        safety = d;
-                    }
-                    d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[0], NSGAII.endPoint);
-                    if (d < safety) {
-                        safety = d;
-                    }
-                } else {
-                    for (int i = 0; i < points.length; i++) {
-                        d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[h + 1], points[i]);
-                        if (d < safety) {
-                            safety = d;
-                        }
-                    }
-                    d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[h + 1], NSGAII.startPoint);
-                    if (d < safety) {
-                        safety = d;
-                    }
-                    d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[h + 1], NSGAII.endPoint);
-                    if (d < safety) {
-                        safety = d;
-                    }
-                }
-            }
-        }
-        safety = Math.exp(-safety);
-        return safety;
-    }
+	public double pathSafety(Graph g) {
+		double[] Sa = new double[points.length + 1];
+		double d, safety = 0;
+		for (int i = 1; i < points.length; i++) {
+			Sa[i] = 10000;
+			for (int j = 0; j < g.obstacleNumber; j++) {
+				for (int h = 0; h < g.obstacles[j].cornerNumber; h++) {
+					if (i == 0) {
+						d = disPointSeg(NSGAII.startPoint, points[i], g.obstacles[j].points[h]);
+					} else if (i == points.length) {
+						d = disPointSeg(points[i - 1], NSGAII.endPoint, g.obstacles[j].points[h]);
+					} else {
+						d = disPointSeg(points[i - 1], points[i], g.obstacles[j].points[h]);
+					}
+					if (d < Sa[i]) {
+						Sa[i] = d;
+					}
+				}
+			}
+		}
+		safety = Sa[1];
+		for (int i = 1; i < points.length; i++) {
+			if (safety > Sa[i]) {
+				safety = Sa[i];
+			}
+		}
+		for (int j = 0; j < g.obstacleNumber; j++) {
+			for (int h = 0; h < g.obstacles[j].cornerNumber; h++) {
+				if (h == g.obstacles[j].cornerNumber - 1) {
+					for (int i = 0; i < points.length; i++) {
+						d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[0], points[i]);
+						if (d < safety) {
+							safety = d;
+						}
+					}
+					d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[0], NSGAII.startPoint);
+					if (d < safety) {
+						safety = d;
+					}
+					d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[0], NSGAII.endPoint);
+					if (d < safety) {
+						safety = d;
+					}
+				} else {
+					for (int i = 0; i < points.length; i++) {
+						d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[h + 1], points[i]);
+						if (d < safety) {
+							safety = d;
+						}
+					}
+					d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[h + 1], NSGAII.startPoint);
+					if (d < safety) {
+						safety = d;
+					}
+					d = disPointSeg(g.obstacles[j].points[h], g.obstacles[j].points[h + 1], NSGAII.endPoint);
+					if (d < safety) {
+						safety = d;
+					}
+				}
+			}
+		}
+		safety = Math.exp(-safety);
+		return safety;
+	}
 }
