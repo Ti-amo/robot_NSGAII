@@ -56,8 +56,9 @@ public class Path {
 			b2 = Math.pow(Math.abs(points[i + 2].y - points[i + 1].y), 2);
 			c1 = (points[i + 1].x - points[i].x) * (points[i + 2].x - points[i + 1].x);
 			c2 = (points[i + 1].y - points[i].y) * (points[i + 2].y - points[i + 1].y);
-			sum = sum + Math.PI - Math.acos((c1 + c2) / (Math.sqrt(a1 + b1) * Math.sqrt(a2 + b2)));
-//			a2 = points[i].x - points[i+1].x;
+			sum = sum + Math.PI
+					- 1 / Math.cos((c1 + c2) / (Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y)
+							* Math.hypot(points[i + 2].x - points[i + 1].x, points[i + 2].y - points[i + 1].y)));
 		}
 		smoothness = sum / (points.length - 2);
 		return smoothness;
